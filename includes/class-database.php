@@ -91,6 +91,19 @@ class Club_Riomonte_Database
             }
         }
 
+        if (!empty($filters['search_term'])) {
+            $search_term = '%' . $wpdb->esc_like($filters['search_term']) . '%';
+            $where_clause .= $include_deleted ? " WHERE" : " AND";
+            $where_clause .= $wpdb->prepare(
+                " (gov_id LIKE %s OR email LIKE %s OR first_name LIKE %s OR last_name LIKE %s OR CONCAT(first_name, ' ', last_name) LIKE %s)",
+                $search_term,
+                $search_term,
+                $search_term,
+                $search_term,
+                $search_term
+            );
+        }
+
         // Add more filter conditions here as needed
 
         return $wpdb->get_results(
