@@ -52,10 +52,10 @@ if (!defined('ABSPATH')) {
                     <?php endif; ?>
                 </td>
                 <td class="column-expiration">
-                    <?php echo $member->expiration_date ? esc_html(date('Y-m-d', strtotime($member->expiration_date))) : '—'; ?>
+                    <?php echo $member->expiration_date ? esc_html(date_i18n('j M Y', strtotime($member->expiration_date))) : '—'; ?>
                 </td>
                 <td class="column-last-payment">
-                    <?php echo $member->last_payment_date ? esc_html(date('Y-m-d', strtotime($member->last_payment_date))) : '—'; ?>
+                    <?php echo $member->last_payment_date ? esc_html(date_i18n('j M Y', strtotime($member->last_payment_date))) : '—'; ?>
                 </td>
                 <td class="column-actions">
                     <a href="?page=club-riomonte&action=edit&id=<?php echo $member->id; ?>" class="button button-small">Editar</a>

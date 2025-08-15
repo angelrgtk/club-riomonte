@@ -18,7 +18,7 @@ class Club_Riomonte_Shortcode
         // Set default attributes
         $atts = shortcode_atts(array(
             'title' => 'Consulta de Miembro',
-            'search_label' => 'Ingresa tu Cédula o ID de Miembro',
+            'search_label' => 'Ingresa tu Número de Documento',
             'button_text' => 'Buscar'
         ), $atts);
 
@@ -32,7 +32,7 @@ class Club_Riomonte_Shortcode
             $member = Club_Riomonte_Database::get_member_by_search($search_value);
 
             if (!$member) {
-                $error_message = 'No se encontró ningún miembro con el ID proporcionado. Por favor verifica tu información e intenta nuevamente.';
+                $error_message = 'No se encontró ningún miembro con el número de documento proporcionado. Por favor verifica tu información e intenta nuevamente.';
             }
         }
 

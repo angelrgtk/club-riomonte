@@ -62,8 +62,7 @@ class Club_Riomonte_Database
         self::init();
 
         return $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM " . self::$table_name . " WHERE (gov_id = %s OR id = %s) AND is_deleted = 0",
-            $search_value,
+            "SELECT * FROM " . self::$table_name . " WHERE gov_id = %s AND is_deleted = 0",
             $search_value
         ));
     }
