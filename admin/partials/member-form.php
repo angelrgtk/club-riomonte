@@ -114,9 +114,10 @@ function club_riomonte_display_member_form($member = null)
                             <label for="active_subscription">Suscripción Activa</label>
                         </th>
                         <td>
-                            <input type="checkbox" id="active_subscription" name="active_subscription"
+                            <input type="checkbox" style="display: none;" id="active_subscription" name="active_subscription" class="switch-input"
                                 <?php echo ($is_edit && $member->active_subscription) ? ' checked' : ''; ?>>
-                            <span class="description">Marca si el miembro tiene una suscripción activa</span>
+                            <label class="switch-label" for="active_subscription"></label>
+                            <p class="description">Marca si el miembro tiene una suscripción activa</p>
                         </td>
                     </tr>
                     <tr>
@@ -151,3 +152,40 @@ function club_riomonte_display_member_form($member = null)
 <?php
 }
 ?>
+
+<style>
+    .switch-input {
+        display: none;
+    }
+
+    .switch-label {
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+        position: relative;
+        cursor: pointer;
+        background-color: #ccc;
+        border-radius: 34px;
+        transition: background-color 0.2s;
+    }
+
+    .switch-label:before {
+        content: '';
+        position: absolute;
+        width: 26px;
+        height: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        border-radius: 50%;
+        transition: transform 0.2s;
+    }
+
+    .switch-input:checked+.switch-label {
+        background-color: #4caf50;
+    }
+
+    .switch-input:checked+.switch-label:before {
+        transform: translateX(26px);
+    }
+</style>
