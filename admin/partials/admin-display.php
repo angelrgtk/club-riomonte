@@ -5,7 +5,13 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-$members = Club_Riomonte_Database::get_all_members();
+// Obtener el estado de suscripción del filtro
+$filters = [
+    'subscription_status' => isset($_GET['subscription_status']) ? $_GET['subscription_status'] : null,
+];
+
+// Obtener los miembros filtrados
+$members = Club_Riomonte_Database::get_all_members($filters);
 
 ?>
 

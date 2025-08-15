@@ -5,7 +5,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// This file expects $members variable to be available
+// Include the filter bar
+include CLUB_RIOMONTE_PLUGIN_DIR . 'admin/partials/filter-bar.php';
 
 ?>
 

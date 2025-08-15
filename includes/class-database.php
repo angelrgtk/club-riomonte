@@ -68,12 +68,20 @@ class Club_Riomonte_Database
         ));
     }
 
-    public static function get_all_members($include_deleted = false)
+    public static function get_all_members($filters = [], $include_deleted = false)
     {
         global $wpdb;
         self::init();
 
         $where_clause = $include_deleted ? "" : "WHERE is_deleted = 0";
+
+        if (!empty($filters['subscription_status'])) {
+            $status_condition = $filters['subscription_status'] === 'active' ? 1 : 0;
+            $where_clause .= $include_deleted ? " WHERE" : " AND";
+            $where_clause .= " active_subscription = $status_condition";
+        }
+
+        // Add more filter conditions here as needed
 
         return $wpdb->get_results(
             "SELECT * FROM " . self::$table_name . " $where_clause ORDER BY created_at DESC"
