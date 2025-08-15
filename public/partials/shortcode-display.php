@@ -240,8 +240,9 @@ if (!defined('ABSPATH')) {
                         'Email' => '<a href="mailto:' . esc_attr($member->email) . '" style="color: #0073aa; text-decoration: none;">' . esc_html($member->email) . '</a>',
                         'Teléfono' => '<a href="tel:' . esc_attr($member->phone) . '" style="color: #0073aa; text-decoration: none;">' . esc_html($member->phone) . '</a>',
                         'Fecha de Nacimiento' => date('j \d\e F \d\e Y', strtotime($member->birth_date)),
-                        'Estado de Suscripción' => $member->active_subscription ? '<span style="color: #4caf50; font-weight: 600;">✅ Activa</span>' : '<span style="color: #f44336; font-weight: 600;">❌ Inactiva</span>',
-                        'Próximo Pago' => $member->next_payment_date ? date('j \d\e F \d\e Y', strtotime($member->next_payment_date)) : 'N/A',
+                        'Estado de Suscripción' => (!empty($member->expiration_date) && $member->expiration_date >= date('Y-m-d')) ? '<span style="color: #4caf50; font-weight: 600;">✅ Activa</span>' : '<span style="color: #f44336; font-weight: 600;">❌ Inactiva</span>',
+                        'Expira' => $member->expiration_date ? date('j \d\e F \d\e Y', strtotime($member->expiration_date)) : 'N/A',
+                        'Último Pago' => $member->last_payment_date ? date('j \d\e F \d\e Y', strtotime($member->last_payment_date)) : 'N/A',
                         'Miembro Desde' => date('j \d\e F \d\e Y', strtotime($member->created_at))
                     );
 

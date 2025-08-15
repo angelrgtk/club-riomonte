@@ -5,9 +5,6 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// Include the filter bar
-include CLUB_RIOMONTE_PLUGIN_DIR . 'admin/partials/filter-bar.php';
-
 ?>
 
 <table class="wp-list-table widefat fixed striped">
@@ -19,6 +16,8 @@ include CLUB_RIOMONTE_PLUGIN_DIR . 'admin/partials/filter-bar.php';
             <th scope="col" class="manage-column column-email">Email</th>
             <th scope="col" class="manage-column column-phone">Teléfono</th>
             <th scope="col" class="manage-column column-subscription">Suscripción</th>
+            <th scope="col" class="manage-column column-expiration">Expira</th>
+            <th scope="col" class="manage-column column-last-payment">Último Pago</th>
             <th scope="col" class="manage-column column-actions">Acciones</th>
         </tr>
     </thead>
@@ -43,11 +42,20 @@ include CLUB_RIOMONTE_PLUGIN_DIR . 'admin/partials/filter-bar.php';
                     <?php echo esc_html($member->phone); ?>
                 </td>
                 <td class="column-subscription">
-                    <?php if ($member->active_subscription): ?>
+                    <?php
+                    $today = date('Y-m-d');
+                    $is_active = !empty($member->expiration_date) && $member->expiration_date >= $today;
+                    if ($is_active): ?>
                         <span class="dashicons dashicons-yes-alt" style="color: green;" title="Activa"></span> Activa
                     <?php else: ?>
                         <span class="dashicons dashicons-dismiss" style="color: red;" title="Inactiva"></span> Inactiva
                     <?php endif; ?>
+                </td>
+                <td class="column-expiration">
+                    <?php echo $member->expiration_date ? esc_html(date('Y-m-d', strtotime($member->expiration_date))) : '—'; ?>
+                </td>
+                <td class="column-last-payment">
+                    <?php echo $member->last_payment_date ? esc_html(date('Y-m-d', strtotime($member->last_payment_date))) : '—'; ?>
                 </td>
                 <td class="column-actions">
                     <a href="?page=club-riomonte&action=edit&id=<?php echo $member->id; ?>" class="button button-small">Editar</a>

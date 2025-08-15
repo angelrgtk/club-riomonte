@@ -7,7 +7,7 @@ if (!defined('ABSPATH')) {
 
 // Obtener el estado de suscripción del filtro
 $filters = [
-    'subscription_status' => isset($_GET['subscription_status']) ? $_GET['subscription_status'] : null,
+    'expiration_date' => isset($_GET['expiration_date']) ? $_GET['expiration_date'] : null,
 ];
 
 // Obtener los miembros filtrados
@@ -30,6 +30,11 @@ $members = Club_Riomonte_Database::get_all_members($filters);
     <h1 class="wp-heading-inline">Miembros Club Riomonte</h1>
     <a href="?page=club-riomonte&action=create" class="page-title-action">Agregar Nuevo Miembro</a>
     <hr class="wp-header-end" style="margin-bottom: 30px;">
+
+    <?php
+    // Include the filter bar - always show it
+    include CLUB_RIOMONTE_PLUGIN_DIR . 'admin/partials/filter-bar.php';
+    ?>
 
     <?php if (empty($members)): ?>
         <div class="notice notice-info">

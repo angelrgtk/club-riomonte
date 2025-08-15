@@ -118,17 +118,19 @@ function club_riomonte_display_member_form($member = null)
                         </button>
                         <p class="description">Selecciona una imagen de la Biblioteca de Medios de WordPress</p>
                     </div>
-                    <div class="activity-switch" style="margin: 20px 0;">
-                        <input type="checkbox" style="display: none;" id="active_subscription" name="active_subscription" class="switch-input"
-                            <?php echo ($is_edit && $member->active_subscription) ? ' checked' : ''; ?>>
-                        <label class="switch-label" for="active_subscription"></label>
-                        <p class="description">Marca si el miembro tiene una suscripción activa</p>
-                    </div>
-                    <div class="next-payment-date">
-                        <label for="next_payment_date">Próxima Fecha de Pago</label>
-                        <input type="date" id="next_payment_date" name="next_payment_date"
-                            value="<?php echo $is_edit ? esc_attr($member->next_payment_date) : ''; ?>"
+                    <div class="expiration-date" style="margin: 20px 0;">
+                        <label for="expiration_date">Fecha de Expiración</label>
+                        <input type="date" id="expiration_date" name="expiration_date"
+                            value="<?php echo $is_edit ? esc_attr($member->expiration_date) : ''; ?>"
                             class="regular-text" required>
+                        <p class="description">La suscripción se considera activa si hoy es menor o igual a esta fecha.</p>
+                    </div>
+                    <div class="last-payment-date" style="margin: 20px 0;">
+                        <label for="last_payment_date">Último Pago</label>
+                        <input type="date" id="last_payment_date" name="last_payment_date"
+                            value="<?php echo $is_edit ? esc_attr($member->last_payment_date) : ''; ?>"
+                            class="regular-text">
+                        <p class="description">Fecha del último pago registrado (opcional).</p>
                     </div>
                     <p class="submit">
                         <input type="submit" name="submit" id="submit" class="button button-primary" value="<?php echo esc_attr($button_text); ?>">

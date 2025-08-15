@@ -33,8 +33,8 @@ class Club_Riomonte_Database
             phone text NOT NULL,
             profile_picture int(11),
             is_deleted boolean NOT NULL DEFAULT FALSE,
-            active_subscription boolean NOT NULL,
-            next_payment_date date NOT NULL,
+            expiration_date date NOT NULL,
+            last_payment_date date NULL,
             notes text,
             created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
             updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL,
@@ -75,10 +75,20 @@ class Club_Riomonte_Database
 
         $where_clause = $include_deleted ? "" : "WHERE is_deleted = 0";
 
-        if (!empty($filters['subscription_status'])) {
-            $status_condition = $filters['subscription_status'] === 'active' ? 1 : 0;
-            $where_clause .= $include_deleted ? " WHERE" : " AND";
-            $where_clause .= " active_subscription = $status_condition";
+        if (!empty($filters['expiration_date'])) {
+            $current_date = date('Y-m-d');
+            if ($filters['expiration_date'] === 'expired') {
+                $where_clause .= $include_deleted ? " WHERE" : " AND";
+                $where_clause .= " expiration_date < '$current_date'";
+            } elseif ($filters['expiration_date'] === 'expiring_7_days') {
+                $end_date = date('Y-m-d', strtotime('+7 days'));
+                $where_clause .= $include_deleted ? " WHERE" : " AND";
+                $where_clause .= " expiration_date BETWEEN '$current_date' AND '$end_date'";
+            } elseif ($filters['expiration_date'] === 'expiring_30_days') {
+                $end_date = date('Y-m-d', strtotime('+30 days'));
+                $where_clause .= $include_deleted ? " WHERE" : " AND";
+                $where_clause .= " expiration_date BETWEEN '$current_date' AND '$end_date'";
+            }
         }
 
         // Add more filter conditions here as needed

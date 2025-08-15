@@ -158,8 +158,8 @@ class Club_Riomonte_Admin_Pages
             'email' => sanitize_email($post_data['email']),
             'phone' => sanitize_text_field($post_data['phone']),
             'profile_picture' => intval($post_data['profile_picture_id']),
-            'active_subscription' => isset($post_data['active_subscription']) ? 1 : 0,
-            'next_payment_date' => sanitize_text_field($post_data['next_payment_date']),
+            'expiration_date' => sanitize_text_field($post_data['expiration_date']),
+            'last_payment_date' => !empty($post_data['last_payment_date']) ? sanitize_text_field($post_data['last_payment_date']) : null,
             'notes' => sanitize_textarea_field($post_data['notes'])
         );
     }
