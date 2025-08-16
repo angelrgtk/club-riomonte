@@ -228,7 +228,6 @@ if (!defined('ABSPATH')) {
                 <?php endif; ?>
 
                 <h2 class="club-member-name"><?php echo esc_html($member->first_name . ' ' . $member->last_name); ?></h2>
-                <p class="club-member-id">ID de Miembro: #<?php echo esc_html($member->id); ?></p>
             </div>
 
             <!-- Member details table -->
@@ -242,13 +241,10 @@ if (!defined('ABSPATH')) {
                         'Fecha de Nacimiento' => date_i18n('j \d\e F \d\e Y', strtotime($member->birth_date)),
                         'Estado de Suscripción' => (!empty($member->expiration_date) && $member->expiration_date >= date('Y-m-d')) ? '<span style="color: #4caf50; font-weight: 600;">✅ Activa</span>' : '<span style="color: #f44336; font-weight: 600;">❌ Inactiva</span>',
                         'Expira' => $member->expiration_date ? date_i18n('j \d\e F \d\e Y', strtotime($member->expiration_date)) : 'N/A',
-                        'Último Pago' => $member->last_payment_date ? date_i18n('j \d\e F \d\e Y', strtotime($member->last_payment_date)) : 'N/A',
                         'Miembro Desde' => date_i18n('j \d\e F \d\e Y', strtotime($member->created_at))
                     );
 
-                    if (!empty($member->notes)) {
-                        $fields['Notas'] = nl2br(esc_html($member->notes));
-                    }
+
 
                     foreach ($fields as $label => $value):
                     ?>

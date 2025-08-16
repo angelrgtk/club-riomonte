@@ -82,16 +82,7 @@ function club_riomonte_display_member_form($member = null)
                                         class="regular-text" required>
                                 </td>
                             </tr>
-                            <tr>
-                                <th scope="row">
-                                    <label for="notes">Notas</label>
-                                </th>
-                                <td>
-                                    <textarea id="notes" name="notes" rows="5" cols="50" class="large-text"><?php
-                                                                                                            echo $is_edit ? esc_textarea($member->notes) : '';
-                                                                                                            ?></textarea>
-                                </td>
-                            </tr>
+
                         </tbody>
                     </table>
                 </div>
@@ -132,6 +123,7 @@ function club_riomonte_display_member_form($member = null)
                             class="regular-text">
                         <p class="description">Fecha del último pago registrado (opcional).</p>
                     </div>
+
                     <p class="submit">
                         <input type="submit" name="submit" id="submit" class="button button-primary" value="<?php echo esc_attr($button_text); ?>">
                         <a href="<?php echo admin_url('admin.php?page=club-riomonte'); ?>" class="button button-secondary" style="margin-left: 10px;">Cancelar</a>
@@ -139,6 +131,55 @@ function club_riomonte_display_member_form($member = null)
                 </div>
             </div>
         </form>
+
+        <!-- Sección de Notas - Separada del formulario principal -->
+        <?php if ($is_edit): ?>
+            <div class="notes-section-wrapper" style="margin-top: 30px;">
+                <div class="notes-section" style="background: #fff; border: 1px solid #ddd; border-radius: 5px; padding: 20px;">
+                    <h3 style="margin-top: 0; color: #333; border-bottom: 2px solid #0073aa; padding-bottom: 10px;">Notas del Miembro</h3>
+
+                    <!-- Formulario independiente para agregar nueva nota -->
+                    <div class="add-note-form">
+                        <h4>Agregar Nueva Nota</h4>
+                        <form method="post" id="add-note-form" style="background: #f8f8f8; padding: 15px; border-radius: 5px; border: 1px solid #ddd;">
+                            <input type="hidden" name="action" value="add_note">
+                            <input type="hidden" name="member_id" value="<?php echo $member->id; ?>">
+                            <textarea name="note_text" id="note_text" rows="4" cols="50" class="large-text" placeholder="Escriba su nota aquí..." required style="width: 100%; resize: vertical; border: 1px solid #ddd; border-radius: 3px; padding: 8px;"></textarea>
+                            <br><br>
+                            <input type="submit" name="submit_note" class="button button-secondary" value="Agregar Nota">
+                        </form>
+                    </div>
+
+                    <!-- Mostrar notas existentes -->
+                    <div class="existing-notes" style="margin-bottom: 20px;">
+                        <?php
+                        $notes = Club_Riomonte_Database::get_member_notes($member->id);
+                        if (!empty($notes)):
+                        ?>
+                            <div class="notes-list">
+                                <?php foreach ($notes as $note): ?>
+                                    <div class="note-item" style="background: #f9f9f9; border-left: 4px solid #0073aa; padding: 12px; margin-bottom: 10px; border-radius: 3px;">
+                                        <div class="note-content" style="margin-bottom: 8px;">
+                                            <?php echo nl2br(esc_html($note->text)); ?>
+                                        </div>
+                                        <div class="note-meta" style="font-size: 12px; color: #666;">
+                                            <strong>Fecha:</strong> <?php echo date_i18n('j \d\e F \d\e Y \a \l\a\s H:i', strtotime($note->date)); ?>
+                                            <span style="margin-left: 15px;">
+                                                <a href="?page=club-riomonte&action=delete_note&note_id=<?php echo $note->id; ?>&member_id=<?php echo $member->id; ?>"
+                                                    onclick="return confirm('¿Estás seguro de que quieres eliminar esta nota?');"
+                                                    style="color: #a00; text-decoration: none;">Eliminar</a>
+                                            </span>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php else: ?>
+                            <p style="color: #666; font-style: italic;">No hay notas para este miembro.</p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
     </div>
 <?php
 }
@@ -204,5 +245,95 @@ function club_riomonte_display_member_form($member = null)
             flex: 1 0 100%;
             padding-left: 0;
         }
+    }
+
+    /* Estilos para las notas */
+    .notes-section-wrapper {
+        margin-top: 30px;
+    }
+
+    .notes-section {
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 20px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .notes-section h3 {
+        margin-top: 0;
+        color: #333;
+        border-bottom: 2px solid #0073aa;
+        padding-bottom: 10px;
+    }
+
+    .note-item {
+        background: #f9f9f9;
+        border-left: 4px solid #0073aa;
+        padding: 12px;
+        margin-bottom: 10px;
+        border-radius: 3px;
+        transition: background-color 0.2s ease;
+    }
+
+    .note-item:hover {
+        background: #f0f0f0;
+    }
+
+    .note-content {
+        margin-bottom: 8px;
+        line-height: 1.5;
+        color: #333;
+    }
+
+    .note-meta {
+        font-size: 12px;
+        color: #666;
+        border-top: 1px solid #e0e0e0;
+        padding-top: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .note-meta a.delete-note {
+        color: #a00;
+        text-decoration: none;
+        font-weight: bold;
+        padding: 2px 6px;
+        border-radius: 3px;
+        transition: background-color 0.2s ease;
+    }
+
+    .note-meta a.delete-note:hover {
+        background: #f0f0f0;
+        color: #d00;
+    }
+
+    .add-note-form {
+        margin-bottom: 20px;
+        background: #f8f8f8;
+        padding: 15px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+    }
+
+    .add-note-form h4 {
+        margin-top: 0;
+        color: #333;
+    }
+
+    .add-note-form textarea {
+        width: 100%;
+        resize: vertical;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        padding: 8px;
+    }
+
+    .add-note-form textarea:focus {
+        border-color: #0073aa;
+        box-shadow: 0 0 0 1px #0073aa;
+        outline: none;
     }
 </style>

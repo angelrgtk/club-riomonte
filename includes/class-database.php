@@ -9,11 +9,13 @@ class Club_Riomonte_Database
 {
 
     private static $table_name;
+    private static $notes_table_name;
 
     public static function init()
     {
         global $wpdb;
         self::$table_name = $wpdb->prefix . 'club_riomonte_members';
+        self::$notes_table_name = $wpdb->prefix . 'club_riomonte_notes';
     }
 
     public static function create_table()
@@ -23,6 +25,7 @@ class Club_Riomonte_Database
         self::init();
         $charset_collate = $wpdb->get_charset_collate();
 
+        // Create members table (removing notes column)
         $sql = "CREATE TABLE IF NOT EXISTS " . self::$table_name . " (
             id mediumint(9) NOT NULL AUTO_INCREMENT,
             gov_id text NOT NULL,
@@ -35,14 +38,24 @@ class Club_Riomonte_Database
             is_deleted boolean NOT NULL DEFAULT FALSE,
             expiration_date date NOT NULL,
             last_payment_date date NULL,
-            notes text,
             created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
             updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL,
             PRIMARY KEY  (id)
         ) $charset_collate;";
 
+        // Create notes table
+        $notes_sql = "CREATE TABLE IF NOT EXISTS " . self::$notes_table_name . " (
+            id mediumint(9) NOT NULL AUTO_INCREMENT,
+            member_id mediumint(9) NOT NULL,
+            text text NOT NULL,
+            date datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            PRIMARY KEY  (id),
+            FOREIGN KEY (member_id) REFERENCES " . self::$table_name . "(id) ON DELETE CASCADE
+        ) $charset_collate;";
+
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql);
+        dbDelta($notes_sql);
     }
 
     public static function get_member($id)
@@ -148,5 +161,73 @@ class Club_Riomonte_Database
             self::init();
         }
         return self::$table_name;
+    }
+
+    public static function get_notes_table_name()
+    {
+        if (empty(self::$notes_table_name)) {
+            self::init();
+        }
+        return self::$notes_table_name;
+    }
+
+    // Notes CRUD methods
+    public static function create_note($member_id, $text)
+    {
+        global $wpdb;
+        self::init();
+
+        return $wpdb->insert(
+            self::$notes_table_name,
+            array(
+                'member_id' => $member_id,
+                'text' => $text
+            )
+        );
+    }
+
+    public static function get_member_notes($member_id)
+    {
+        global $wpdb;
+        self::init();
+
+        return $wpdb->get_results($wpdb->prepare(
+            "SELECT * FROM " . self::$notes_table_name . " WHERE member_id = %d ORDER BY date DESC",
+            $member_id
+        ));
+    }
+
+    public static function get_note($note_id)
+    {
+        global $wpdb;
+        self::init();
+
+        return $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM " . self::$notes_table_name . " WHERE id = %d",
+            $note_id
+        ));
+    }
+
+    public static function update_note($note_id, $text)
+    {
+        global $wpdb;
+        self::init();
+
+        return $wpdb->update(
+            self::$notes_table_name,
+            array('text' => $text),
+            array('id' => $note_id)
+        );
+    }
+
+    public static function delete_note($note_id)
+    {
+        global $wpdb;
+        self::init();
+
+        return $wpdb->delete(
+            self::$notes_table_name,
+            array('id' => $note_id)
+        );
     }
 }

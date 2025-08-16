@@ -47,11 +47,16 @@ class Club_Riomonte_Admin_Pages
             $notices = array(
                 'updated' => '¡Miembro actualizado exitosamente!',
                 'deleted' => '¡Miembro eliminado exitosamente!',
-                'created' => '¡Miembro creado exitosamente!'
+                'created' => '¡Miembro creado exitosamente!',
+                'note_added' => '¡Nota agregada exitosamente!',
+                'note_deleted' => '¡Nota eliminada exitosamente!',
+                'note_error' => 'Error al procesar la nota. Intente nuevamente.',
+                'empty_note' => 'La nota no puede estar vacía.'
             );
 
             if (isset($notices[$message])) {
-                echo '<div class="notice notice-success is-dismissible"><p>' . esc_html($notices[$message]) . '</p></div>';
+                $class = in_array($message, ['note_error', 'empty_note']) ? 'notice-error' : 'notice-success';
+                echo '<div class="notice ' . $class . ' is-dismissible"><p>' . esc_html($notices[$message]) . '</p></div>';
             }
         }
     }
@@ -105,6 +110,20 @@ class Club_Riomonte_Admin_Pages
 
     public function handle_actions()
     {
+        // Handle notes actions
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (isset($_POST['action']) && $_POST['action'] === 'add_note') {
+                $this->process_add_note();
+                return;
+            }
+        }
+
+        // Handle AJAX delete note action
+        if (isset($_GET['action']) && $_GET['action'] === 'delete_note' && isset($_GET['note_id'])) {
+            $this->process_delete_note();
+            return;
+        }
+
         // Handle create action
         if (isset($_GET['action']) && $_GET['action'] === 'create') {
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -159,8 +178,52 @@ class Club_Riomonte_Admin_Pages
             'phone' => sanitize_text_field($post_data['phone']),
             'profile_picture' => intval($post_data['profile_picture_id']),
             'expiration_date' => sanitize_text_field($post_data['expiration_date']),
-            'last_payment_date' => !empty($post_data['last_payment_date']) ? sanitize_text_field($post_data['last_payment_date']) : null,
-            'notes' => sanitize_textarea_field($post_data['notes'])
+            'last_payment_date' => !empty($post_data['last_payment_date']) ? sanitize_text_field($post_data['last_payment_date']) : null
         );
+    }
+
+    private function process_add_note()
+    {
+        if (!isset($_POST['member_id']) || !isset($_POST['note_text'])) {
+            wp_redirect(admin_url('admin.php?page=club-riomonte&message=error'));
+            exit;
+        }
+
+        $member_id = intval($_POST['member_id']);
+        $note_text = sanitize_textarea_field($_POST['note_text']);
+
+        if (empty($note_text)) {
+            wp_redirect(admin_url('admin.php?page=club-riomonte&action=edit&id=' . $member_id . '&message=empty_note'));
+            exit;
+        }
+
+        $result = Club_Riomonte_Database::create_note($member_id, $note_text);
+
+        if ($result) {
+            wp_redirect(admin_url('admin.php?page=club-riomonte&action=edit&id=' . $member_id . '&message=note_added'));
+        } else {
+            wp_redirect(admin_url('admin.php?page=club-riomonte&action=edit&id=' . $member_id . '&message=note_error'));
+        }
+        exit;
+    }
+
+    private function process_delete_note()
+    {
+        if (!isset($_GET['note_id']) || !isset($_GET['member_id'])) {
+            wp_redirect(admin_url('admin.php?page=club-riomonte&message=error'));
+            exit;
+        }
+
+        $note_id = intval($_GET['note_id']);
+        $member_id = intval($_GET['member_id']);
+
+        $result = Club_Riomonte_Database::delete_note($note_id);
+
+        if ($result) {
+            wp_redirect(admin_url('admin.php?page=club-riomonte&action=edit&id=' . $member_id . '&message=note_deleted'));
+        } else {
+            wp_redirect(admin_url('admin.php?page=club-riomonte&action=edit&id=' . $member_id . '&message=note_error'));
+        }
+        exit;
     }
 }
