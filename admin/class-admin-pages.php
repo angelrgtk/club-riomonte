@@ -51,11 +51,14 @@ class Club_Riomonte_Admin_Pages
                 'note_added' => '¡Nota agregada exitosamente!',
                 'note_deleted' => '¡Nota eliminada exitosamente!',
                 'note_error' => 'Error al procesar la nota. Intente nuevamente.',
-                'empty_note' => 'La nota no puede estar vacía.'
+                'empty_note' => 'La nota no puede estar vacía.',
+                'email_sent' => '¡Email enviado exitosamente!',
+                'email_error' => 'Error al enviar el email. Intente nuevamente.',
+                'email_invalid_data' => 'Error: Datos de email inválidos.'
             );
 
             if (isset($notices[$message])) {
-                $class = in_array($message, ['note_error', 'empty_note']) ? 'notice-error' : 'notice-success';
+                $class = in_array($message, ['note_error', 'empty_note', 'email_error', 'email_invalid_data']) ? 'notice-error' : 'notice-success';
                 echo '<div class="notice ' . $class . ' is-dismissible"><p>' . esc_html($notices[$message]) . '</p></div>';
             }
         }
@@ -114,6 +117,12 @@ class Club_Riomonte_Admin_Pages
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (isset($_POST['action']) && $_POST['action'] === 'add_note') {
                 $this->process_add_note();
+                return;
+            }
+
+            // Handle email sending
+            if (isset($_POST['action']) && $_POST['action'] === 'send_email') {
+                $this->process_send_email();
                 return;
             }
         }
@@ -232,6 +241,73 @@ class Club_Riomonte_Admin_Pages
             wp_redirect(admin_url('admin.php?page=club-riomonte&action=edit&id=' . $member_id . '&message=note_error'));
         }
         exit;
+    }
+
+    private function process_send_email()
+    {
+        // Validate required fields
+        if (!isset($_POST['member_id']) || !isset($_POST['email_subject']) || !isset($_POST['email_text'])) {
+            wp_redirect(admin_url('admin.php?page=club-riomonte&message=email_invalid_data'));
+            exit;
+        }
+
+        $member_id = intval($_POST['member_id']);
+        $email_subject = sanitize_text_field($_POST['email_subject']);
+        $email_text = sanitize_textarea_field($_POST['email_text']);
+
+        // Validate data
+        if (empty($member_id) || empty($email_subject) || empty($email_text)) {
+            wp_redirect(admin_url('admin.php?page=club-riomonte&action=edit&id=' . $member_id . '&message=email_invalid_data'));
+            exit;
+        }
+
+        // Get member data
+        $member = Club_Riomonte_Database::get_member($member_id);
+        if (!$member) {
+            wp_redirect(admin_url('admin.php?page=club-riomonte&message=email_error'));
+            exit;
+        }
+
+        // Prepare email content
+        $to = $member->email;
+        $subject = $email_subject;
+
+        // Create a nice email template
+        $message = $this->build_email_template($member, $email_text);
+
+        // Set email headers
+        $headers = array(
+            'Content-Type: text/html; charset=UTF-8',
+            'From: ' . get_option('blogname') . ' <' . get_option('admin_email') . '>'
+        );
+
+        // Send email using WordPress wp_mail function
+        $sent = wp_mail($to, $subject, $message, $headers);
+
+        // Redirect with appropriate message
+        if ($sent) {
+            wp_redirect(admin_url('admin.php?page=club-riomonte&action=edit&id=' . $member_id . '&message=email_sent'));
+        } else {
+            wp_redirect(admin_url('admin.php?page=club-riomonte&action=edit&id=' . $member_id . '&message=email_error'));
+        }
+        exit;
+    }
+
+    private function build_email_template($member, $custom_message)
+    {
+        $site_name = get_option('blogname');
+        $site_url = get_option('home');
+
+        // Iniciar output buffering para capturar el HTML del template
+        ob_start();
+
+        // Incluir el template de email
+        include CLUB_RIOMONTE_PLUGIN_DIR . 'includes/mail/email-template.php';
+
+        // Obtener el contenido y limpiar el buffer
+        $template = ob_get_clean();
+
+        return $template;
     }
 
     private function process_csv_export()

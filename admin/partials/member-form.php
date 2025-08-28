@@ -191,6 +191,53 @@ function club_riomonte_display_member_form($member = null)
                     </div>
                 </div>
             </div>
+
+            <!-- Sección de Envío de Email - Solo para miembros existentes -->
+            <div class="email-section-wrapper" style="margin-top: 30px;">
+                <div class="email-section" style="background: #fff; border: 1px solid #ddd; border-radius: 5px; padding: 20px;">
+                    <h3 style="margin-top: 0; color: #333; border-bottom: 2px solid #28a745; padding-bottom: 10px;">
+                        <span class="dashicons dashicons-email-alt" style="margin-right: 8px;"></span>
+                        Enviar Email al Miembro
+                    </h3>
+                    <p style="color: #666; margin-bottom: 20px;">
+                        Envía un mensaje personalizado al email: <strong><?php echo esc_html($member->email); ?></strong>
+                    </p>
+
+                    <!-- Formulario independiente para enviar email -->
+                    <form method="post" id="send-email-form" style="background: #f0f8f0; padding: 20px; border-radius: 5px; border: 1px solid #28a745;">
+                        <input type="hidden" name="action" value="send_email">
+                        <input type="hidden" name="member_id" value="<?php echo $member->id; ?>">
+
+                        <div style="margin-bottom: 15px;">
+                            <label for="email_subject" style="display: block; font-weight: 600; margin-bottom: 5px;">Asunto:</label>
+                            <input type="text" name="email_subject" id="email_subject"
+                                class="large-text"
+                                placeholder="Ej: Información importante sobre tu membresía"
+                                required
+                                style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <label for="email_text" style="display: block; font-weight: 600; margin-bottom: 5px;">Mensaje:</label>
+                            <textarea name="email_text" id="email_text" rows="8"
+                                class="large-text"
+                                placeholder="Escribe tu mensaje aquí..."
+                                required
+                                style="width: 100%; resize: vertical; border: 1px solid #ddd; border-radius: 3px; padding: 8px;"></textarea>
+                            <p class="description" style="margin-top: 5px; font-size: 12px; color: #666;">
+                                Se incluirá automáticamente el nombre del miembro y la información del club.
+                            </p>
+                        </div>
+
+                        <div style="text-align: center;">
+                            <input type="submit" name="submit_email" class="button button-primary"
+                                value="📧 Enviar Email"
+                                style="background: #28a745; border-color: #28a745; font-size: 14px; padding: 8px 20px;"
+                                onclick="return confirm('¿Estás seguro de que quieres enviar este email a <?php echo esc_js($member->first_name . ' ' . $member->last_name); ?>?');">
+                        </div>
+                    </form>
+                </div>
+            </div>
         <?php endif; ?>
     </div>
 <?php
@@ -383,6 +430,62 @@ function club_riomonte_display_member_form($member = null)
         border-color: #0073aa;
         box-shadow: 0 0 0 1px #0073aa;
         outline: none;
+    }
+
+    /* Estilos para la sección de email */
+    .email-section-wrapper {
+        margin-top: 30px;
+    }
+
+    .email-section {
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 20px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .email-section h3 {
+        margin-top: 0;
+        color: #333;
+        border-bottom: 2px solid #28a745;
+        padding-bottom: 10px;
+        display: flex;
+        align-items: center;
+    }
+
+    #send-email-form {
+        background: #f0f8f0;
+        padding: 20px;
+        border-radius: 5px;
+        border: 1px solid #28a745;
+    }
+
+    #send-email-form input[type="text"],
+    #send-email-form textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        transition: border-color 0.2s ease;
+    }
+
+    #send-email-form input[type="text"]:focus,
+    #send-email-form textarea:focus {
+        border-color: #28a745;
+        box-shadow: 0 0 0 1px #28a745;
+        outline: none;
+    }
+
+    #send-email-form .button-primary {
+        background: #28a745;
+        border-color: #28a745;
+        transition: background-color 0.2s ease;
+    }
+
+    #send-email-form .button-primary:hover {
+        background: #218838;
+        border-color: #218838;
     }
 </style>
 
