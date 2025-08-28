@@ -124,6 +124,12 @@ class Club_Riomonte_Admin_Pages
             return;
         }
 
+        // Handle CSV export action
+        if (isset($_GET['action']) && $_GET['action'] === 'export_csv') {
+            $this->process_csv_export();
+            return;
+        }
+
         // Handle create action
         if (isset($_GET['action']) && $_GET['action'] === 'create') {
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -225,6 +231,77 @@ class Club_Riomonte_Admin_Pages
         } else {
             wp_redirect(admin_url('admin.php?page=club-riomonte&action=edit&id=' . $member_id . '&message=note_error'));
         }
+        exit;
+    }
+
+    private function process_csv_export()
+    {
+        // Get the same filters used in the main page
+        $filters = [
+            'expiration_date' => isset($_GET['expiration_date']) ? $_GET['expiration_date'] : null,
+            'search_term' => isset($_GET['search_term']) && strlen($_GET['search_term']) >= 3 ? $_GET['search_term'] : null,
+            'is_public' => isset($_GET['is_public']) ? $_GET['is_public'] : null,
+        ];
+
+        // Get filtered members
+        $members = Club_Riomonte_Database::get_all_members($filters);
+
+        // Set headers for CSV download
+        $filename = 'miembros_club_riomonte_' . date('Y-m-d_H-i-s') . '.csv';
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Expires: 0');
+
+        // Create file handle
+        $output = fopen('php://output', 'w');
+
+        // Add BOM for proper UTF-8 encoding in Excel
+        fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+        // CSV Headers
+        $headers = [
+            'ID',
+            'Cédula',
+            'Nombre',
+            'Apellido',
+            'Fecha de Nacimiento',
+            'Email',
+            'Teléfono',
+            'Estado de Suscripción',
+            'Fecha de Expiración',
+            'Último Pago',
+            'Privacidad',
+            'Fecha de Creación'
+        ];
+
+        fputcsv($output, $headers);
+
+        // Add member data
+        foreach ($members as $member) {
+            $today = date('Y-m-d');
+            $is_active = !empty($member->expiration_date) && $member->expiration_date >= $today;
+
+            $row = [
+                $member->id,
+                $member->gov_id,
+                $member->first_name,
+                $member->last_name,
+                $member->birth_date ? date_i18n('j/m/Y', strtotime($member->birth_date)) : '',
+                $member->email,
+                $member->phone,
+                $is_active ? 'Activa' : 'Inactiva',
+                $member->expiration_date ? date_i18n('j/m/Y', strtotime($member->expiration_date)) : '',
+                $member->last_payment_date ? date_i18n('j/m/Y', strtotime($member->last_payment_date)) : '',
+                $member->is_public ? 'Público' : 'Privado',
+                date_i18n('j/m/Y H:i', strtotime($member->created_at))
+            ];
+
+            fputcsv($output, $row);
+        }
+
+        fclose($output);
         exit;
     }
 }

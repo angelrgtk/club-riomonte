@@ -45,5 +45,18 @@ if (!defined('ABSPATH')) {
                 <a href="?page=club-riomonte" class="button button-link-delete">Limpiar</a>
             <?php endif; ?>
         </div>
+
+        <div>
+            <a href="?page=club-riomonte&action=export_csv<?php
+                                                            $export_params = [];
+                                                            if (!empty($_GET['search_term'])) $export_params[] = 'search_term=' . urlencode($_GET['search_term']);
+                                                            if (!empty($_GET['expiration_date'])) $export_params[] = 'expiration_date=' . urlencode($_GET['expiration_date']);
+                                                            if (!empty($_GET['is_public'])) $export_params[] = 'is_public=' . urlencode($_GET['is_public']);
+                                                            echo !empty($export_params) ? '&' . implode('&', $export_params) : '';
+                                                            ?>" class="button button-primary" style="background: #0073aa;">
+                <span class="dashicons dashicons-download" style="margin-right: 5px; margin-top: 3px;"></span>
+                Exportar CSV
+            </a>
+        </div>
     </div>
 </form>
