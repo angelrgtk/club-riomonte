@@ -16,6 +16,7 @@ if (!defined('ABSPATH')) {
             <th scope="col" class="manage-column column-email">Email</th>
             <th scope="col" class="manage-column column-phone">Teléfono</th>
             <th scope="col" class="manage-column column-subscription">Suscripción</th>
+            <th scope="col" class="manage-column column-is_public">Privacidad</th>
             <th scope="col" class="manage-column column-expiration">Expira</th>
             <th scope="col" class="manage-column column-last-payment">Último Pago</th>
             <th scope="col" class="manage-column column-actions">Acciones</th>
@@ -50,6 +51,9 @@ if (!defined('ABSPATH')) {
                     <?php else: ?>
                         <span class="dashicons dashicons-dismiss" style="color: red;" title="Inactiva"></span> Inactiva
                     <?php endif; ?>
+                </td>
+                <td class="column-is_public">
+                    <?php echo $member->is_public ? 'Publico' : 'Privado'; ?>
                 </td>
                 <td class="column-expiration">
                     <?php echo $member->expiration_date ? esc_html(date_i18n('j M Y', strtotime($member->expiration_date))) : '—'; ?>

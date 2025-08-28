@@ -31,8 +31,17 @@ if (!defined('ABSPATH')) {
         </div>
 
         <div>
+            <label for="is_public">Privacidad:</label>
+            <select name="is_public" id="is_public">
+                <option value="">Todos</option>
+                <option value="1" <?php if (isset($_GET['is_public']) && $_GET['is_public'] == '1') echo 'selected'; ?>>Publico</option>
+                <option value="0" <?php if (isset($_GET['is_public']) && $_GET['is_public'] == '0') echo 'selected'; ?>>Privado</option>
+            </select>
+        </div>
+
+        <div>
             <button type="submit" class="button">Buscar</button>
-            <?php if (!empty($_GET['search_term']) || !empty($_GET['expiration_date'])): ?>
+            <?php if (!empty($_GET['search_term']) || !empty($_GET['expiration_date']) || !empty($_GET['is_public'])): ?>
                 <a href="?page=club-riomonte" class="button button-link-delete">Limpiar</a>
             <?php endif; ?>
         </div>

@@ -38,6 +38,7 @@ class Club_Riomonte_Database
             is_deleted boolean NOT NULL DEFAULT FALSE,
             expiration_date date NOT NULL,
             last_payment_date date NULL,
+            is_public boolean NOT NULL DEFAULT TRUE,
             created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
             updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL,
             PRIMARY KEY  (id)
@@ -69,13 +70,13 @@ class Club_Riomonte_Database
         ));
     }
 
-    public static function get_member_by_search($search_value)
+    public static function get_member_by_public_search($search_value)
     {
         global $wpdb;
         self::init();
 
         return $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM " . self::$table_name . " WHERE gov_id = %s AND is_deleted = 0",
+            "SELECT * FROM " . self::$table_name . " WHERE gov_id = %s AND is_deleted = 0 AND is_public = 1",
             $search_value
         ));
     }
@@ -85,38 +86,51 @@ class Club_Riomonte_Database
         global $wpdb;
         self::init();
 
-        $where_clause = $include_deleted ? "" : "WHERE is_deleted = 0";
+        $where_conditions = [];
 
+        // Base condition for deleted members
+        if (!$include_deleted) {
+            $where_conditions[] = "is_deleted = 0";
+        }
+
+        // Filter by expiration date
         if (!empty($filters['expiration_date'])) {
             $current_date = date('Y-m-d');
             if ($filters['expiration_date'] === 'expired') {
-                $where_clause .= $include_deleted ? " WHERE" : " AND";
-                $where_clause .= " expiration_date < '$current_date'";
+                $where_conditions[] = "expiration_date < '$current_date'";
             } elseif ($filters['expiration_date'] === 'expiring_7_days') {
                 $end_date = date('Y-m-d', strtotime('+7 days'));
-                $where_clause .= $include_deleted ? " WHERE" : " AND";
-                $where_clause .= " expiration_date BETWEEN '$current_date' AND '$end_date'";
+                $where_conditions[] = "expiration_date BETWEEN '$current_date' AND '$end_date'";
             } elseif ($filters['expiration_date'] === 'expiring_30_days') {
                 $end_date = date('Y-m-d', strtotime('+30 days'));
-                $where_clause .= $include_deleted ? " WHERE" : " AND";
-                $where_clause .= " expiration_date BETWEEN '$current_date' AND '$end_date'";
+                $where_conditions[] = "expiration_date BETWEEN '$current_date' AND '$end_date'";
             }
         }
 
+        // Filter by search term
         if (!empty($filters['search_term'])) {
             $search_term = '%' . $wpdb->esc_like($filters['search_term']) . '%';
-            $where_clause .= $include_deleted ? " WHERE" : " AND";
-            $where_clause .= $wpdb->prepare(
-                " (gov_id LIKE %s OR email LIKE %s OR first_name LIKE %s OR last_name LIKE %s OR CONCAT(first_name, ' ', last_name) LIKE %s)",
+            $search_condition = $wpdb->prepare(
+                "(gov_id LIKE %s OR email LIKE %s OR first_name LIKE %s OR last_name LIKE %s OR CONCAT(first_name, ' ', last_name) LIKE %s)",
                 $search_term,
                 $search_term,
                 $search_term,
                 $search_term,
                 $search_term
             );
+            $where_conditions[] = $search_condition;
         }
 
-        // Add more filter conditions here as needed
+        // Filter by privacy (is_public)
+        if (isset($filters['is_public']) && $filters['is_public'] !== '') {
+            $where_conditions[] = "is_public = " . intval($filters['is_public']);
+        }
+
+        // Build WHERE clause
+        $where_clause = '';
+        if (!empty($where_conditions)) {
+            $where_clause = 'WHERE ' . implode(' AND ', $where_conditions);
+        }
 
         return $wpdb->get_results(
             "SELECT * FROM " . self::$table_name . " $where_clause ORDER BY created_at DESC"

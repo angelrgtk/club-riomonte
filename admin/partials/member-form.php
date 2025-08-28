@@ -109,6 +109,18 @@ function club_riomonte_display_member_form($member = null)
                         </button>
                         <p class="description">Selecciona una imagen de la Biblioteca de Medios de WordPress</p>
                     </div>
+                    <div class="is_public" style="margin: 20px 0;">
+                        <div class="switch-container" style="display: flex; align-items: center; gap: 10px; margin: 10px 0;">
+                            <span class="switch-label-text">Privado</span>
+                            <label class="switch">
+                                <input type="checkbox" id="is_public" name="is_public" value="1"
+                                    <?php echo ($is_edit && $member->is_public) || (!$is_edit) ? 'checked' : ''; ?>>
+                                <span class="slider"></span>
+                            </label>
+                            <span class="switch-label-text">Público</span>
+                        </div>
+                        <p class="description">Si es público, el miembro aparecerá en el listado de miembros públicos.</p>
+                    </div>
                     <div class="expiration-date" style="margin: 20px 0;">
                         <label for="expiration_date">Fecha de Expiración</label>
                         <input type="date" id="expiration_date" name="expiration_date"
@@ -186,39 +198,75 @@ function club_riomonte_display_member_form($member = null)
 ?>
 
 <style>
-    .switch-input {
-        display: none;
+    /* Switch moderno para privacidad */
+    .switch-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 10px 0;
     }
 
-    .switch-label {
+    .switch-label-text {
+        font-size: 13px;
+        color: #666;
+        font-weight: 500;
+    }
+
+    .switch {
+        position: relative;
         display: inline-block;
         width: 60px;
-        height: 34px;
-        position: relative;
-        cursor: pointer;
-        background-color: #ccc;
-        border-radius: 34px;
-        transition: background-color 0.2s;
+        height: 30px;
     }
 
-    .switch-label:before {
-        content: '';
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
         position: absolute;
-        width: 26px;
-        height: 26px;
-        left: 4px;
-        bottom: 4px;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: 0.3s ease;
+        border-radius: 30px;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 24px;
+        width: 24px;
+        left: 3px;
+        bottom: 3px;
         background-color: white;
+        transition: 0.3s ease;
         border-radius: 50%;
-        transition: transform 0.2s;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
 
-    .switch-input:checked+.switch-label {
-        background-color: #4caf50;
+    input:checked+.slider {
+        background-color: #0073aa;
+        box-shadow: inset 0 2px 4px rgba(0, 115, 170, 0.3);
     }
 
-    .switch-input:checked+.switch-label:before {
-        transform: translateX(26px);
+    input:focus+.slider {
+        box-shadow: 0 0 0 2px rgba(0, 115, 170, 0.3);
+    }
+
+    input:checked+.slider:before {
+        transform: translateX(30px);
+    }
+
+    /* Animación de hover */
+    .slider:hover {
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15), 0 0 0 2px rgba(0, 115, 170, 0.1);
     }
 
     .form-container {
@@ -337,3 +385,45 @@ function club_riomonte_display_member_form($member = null)
         outline: none;
     }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const switchInput = document.getElementById('is_public');
+        const switchLabels = document.querySelectorAll('.switch-label-text');
+
+        function updateLabels() {
+            if (switchInput.checked) {
+                // Público - resaltar el texto "Público"
+                switchLabels[0].style.color = '#666'; // Privado
+                switchLabels[1].style.color = '#0073aa'; // Público
+                switchLabels[1].style.fontWeight = '600';
+                switchLabels[0].style.fontWeight = '500';
+            } else {
+                // Privado - resaltar el texto "Privado"
+                switchLabels[0].style.color = '#d63638'; // Privado
+                switchLabels[1].style.color = '#666'; // Público
+                switchLabels[0].style.fontWeight = '600';
+                switchLabels[1].style.fontWeight = '500';
+            }
+        }
+
+        // Actualizar al cargar la página
+        updateLabels();
+
+        // Actualizar cuando cambie el switch
+        switchInput.addEventListener('change', updateLabels);
+
+        // Efecto de click en las etiquetas
+        switchLabels.forEach(function(label, index) {
+            label.addEventListener('click', function() {
+                switchInput.checked = (index === 1); // 0 = Privado, 1 = Público
+                updateLabels();
+            });
+
+            // Hacer las etiquetas clickeables visualmente
+            label.style.cursor = 'pointer';
+            label.style.userSelect = 'none';
+            label.style.transition = 'all 0.2s ease';
+        });
+    });
+</script>

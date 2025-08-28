@@ -29,7 +29,7 @@ class Club_Riomonte_Shortcode
         // Handle form submission
         if (isset($_POST['club_search_submit']) && !empty($_POST['club_search_id'])) {
             $search_value = sanitize_text_field($_POST['club_search_id']);
-            $member = Club_Riomonte_Database::get_member_by_search($search_value);
+            $member = Club_Riomonte_Database::get_member_by_public_search($search_value);
 
             if (!$member) {
                 $error_message = 'No se encontró ningún miembro con el número de documento proporcionado. Por favor verifica tu información e intenta nuevamente.';

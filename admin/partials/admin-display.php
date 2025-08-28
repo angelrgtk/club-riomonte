@@ -9,6 +9,7 @@ if (!defined('ABSPATH')) {
 $filters = [
     'expiration_date' => isset($_GET['expiration_date']) ? $_GET['expiration_date'] : null,
     'search_term' => isset($_GET['search_term']) && strlen($_GET['search_term']) >= 3 ? $_GET['search_term'] : null,
+    'is_public' => isset($_GET['is_public']) ? $_GET['is_public'] : null,
 ];
 
 // Obtener los miembros filtrados
