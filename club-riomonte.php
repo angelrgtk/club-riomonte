@@ -5,6 +5,7 @@ Description: Plugin para administrar miembros del Club Riomonte.
 Version: 1.0.0
 Author: Angel Alemany
 Author URI: https://www.linkedin.com/in/alemanydev/
+Plugin URI: https://github.com/angelrgtk/club-riomonte
 */
 
 // Prevent direct access
